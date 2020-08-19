@@ -6,6 +6,7 @@ namespace Newwebsouth\Upload;
 
 use Newwebsouth\Upload\Exception\UploadDuplicationException;
 use Newwebsouth\Upload\Exception\UploadException;
+use Newwebsouth\Upload\Exception\UploadSizeException;
 use Newwebsouth\Upload\Exception\UploadTypeException;
 use Nomess\Components\EntityManager\TransactionObserverInterface;
 use Nomess\Components\EntityManager\TransactionSubjectInterface;
@@ -140,7 +141,7 @@ class UploadManager implements UploadManagerInterface, TransactionObserverInterf
      * Control that file size is valid
      *
      * @param int $size
-     * @throws UploadTypeException
+     * @throws UploadSizeException
      */
     private function validSize( int $size ): void
     {
@@ -150,7 +151,7 @@ class UploadManager implements UploadManagerInterface, TransactionObserverInterf
         }
         
         if( $this->config[UploadManagerInterface::MAX_FILE_SIZE] < $size ) {
-            throw new UploadTypeException( 'File too large' );
+            throw new UploadSizeException( 'File too large' );
         }
     }
     
