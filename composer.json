@@ -1,0 +1,16 @@
+{
+    "name": "newwebsouth/upload",
+    "description": "Component of upload",
+    "authors": [
+        {
+            "name": "Romain Lavabre",
+            "email": "webmaster@newwebsouth.fr"
+        }
+    ],
+    "autoload" : {
+		"psr-4" : {
+            "Newwebsouth\\Upload\\": "/"
+		}
+    },
+    "minimum-stability": "stable"
+}
