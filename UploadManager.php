@@ -38,6 +38,7 @@ class UploadManager implements UploadManagerInterface, TransactionObserverInterf
      * @throws UploadException
      * @throws UploadTypeException
      * @throws UploadDuplicationException
+     * @throws UploadSizeException
      */
     public function upload( array $part, string $configurationName ): array
     {
@@ -115,7 +116,7 @@ class UploadManager implements UploadManagerInterface, TransactionObserverInterf
      * Control that type is valid
      *
      * @param string $name
-     * @throws UploadException
+     * @throws UploadTypeException
      */
     private function validType( string $name ): void
     {
@@ -132,7 +133,7 @@ class UploadManager implements UploadManagerInterface, TransactionObserverInterf
         }
         
         if( !$isTypeFound ) {
-            throw new UploadException( 'This type is invalid' );
+            throw new UploadTypeException( 'This type is invalid' );
         }
     }
     
@@ -253,5 +254,31 @@ class UploadManager implements UploadManagerInterface, TransactionObserverInterf
     public function subscribeToTransactionStatus(): void
     {
         $this->transactionSubject->addSubscriber( $this );
+    }
+    
+    public function convertToMultipleArray( array $parts ): array
+    {
+        if( empty( $parts ) ) {
+            return $parts;
+        }
+        
+        if( !is_array( $parts['name'] ) ) {
+            return [ $parts ];
+        }
+        
+        $list      = array();
+        $iteration = count( $parts['name'] );
+        
+        for( $i = 0; $i < $iteration; $i++ ) {
+            $list[] = [
+                'name'     => $parts['name'][$i],
+                'type'     => $parts['type'][$i],
+                'tmp_name' => $parts['tmp_name'][$i],
+                'error'    => $parts['error'][$i],
+                'size'     => $parts['size'][$i],
+            ];
+        }
+        
+        return $list;
     }
 }

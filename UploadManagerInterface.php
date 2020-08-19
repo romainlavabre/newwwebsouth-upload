@@ -6,6 +6,7 @@ namespace Newwebsouth\Upload;
 
 use Newwebsouth\Upload\Exception\UploadDuplicationException;
 use Newwebsouth\Upload\Exception\UploadException;
+use Newwebsouth\Upload\Exception\UploadSizeException;
 use Newwebsouth\Upload\Exception\UploadTypeException;
 
 interface UploadManagerInterface
@@ -32,6 +33,14 @@ interface UploadManagerInterface
      * @throws UploadException
      * @throws UploadTypeException
      * @throws UploadDuplicationException
+     * @throws UploadSizeException
      */
     public function upload( array $part, string $configurationName ): array;
+    
+    
+    /**
+     * @param array $parts
+     * @return array
+     */
+    public function convertToMultipleArray( array $parts ): array;
 }
