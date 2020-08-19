@@ -7,15 +7,26 @@ namespace Newwebsouth\Upload;
 use Newwebsouth\Upload\Exception\UploadDuplicationException;
 use Newwebsouth\Upload\Exception\UploadException;
 use Newwebsouth\Upload\Exception\UploadTypeException;
+use Nomess\Components\EntityManager\TransactionObserverInterface;
+use Nomess\Components\EntityManager\TransactionSubjectInterface;
 
-class UploadManager implements UploadManagerInterface
+class UploadManager implements UploadManagerInterface, TransactionObserverInterface
 {
     
     /**
      * @Inject()
      */
     private Configuration $configuration;
-    private array         $config;
+    private TransactionSubjectInterface $transactionSubject;
+    private array                       $config;
+    private array                       $toMove = array();
+    
+    
+    public function __construct( TransactionSubjectInterface $transactionSubject )
+    {
+        $this->transactionSubject = $transactionSubject;
+        $this->subscribeToTransactionStatus();
+    }
     
     
     /**
@@ -36,14 +47,13 @@ class UploadManager implements UploadManagerInterface
         
         $name = $this->getName( $part['name'] );
         
-        if( move_uploaded_file(
-            $part['tmp_name'],
-            $this->config[UploadManagerInterface::PATH] . $name ) ) {
-            
-            return $this->buildMetadata( $name );
+        if( $this->mustWaitTransaction() ) {
+            $this->toMove[$part['tmp_name']] = $this->config[UploadManagerInterface::PATH] . $name;
+        } else {
+            $this->move( $part['tmp_name'], $this->config[UploadManagerInterface::PATH] . $name );
         }
         
-        throw new UploadException( 'Impossible of upload this file' );
+        return $this->buildMetadata( $name );
     }
     
     
@@ -84,12 +94,12 @@ class UploadManager implements UploadManagerInterface
                     }
                 }
                 
-                if($duplicationRule === 'crash'){
-                    throw new UploadDuplicationException('This file already exists');
+                if( $duplicationRule === 'crash' ) {
+                    throw new UploadDuplicationException( 'This file already exists' );
                 }
                 
-                if(!empty($duplicationRule)){
-                    throw new UploadException("Unknow this duplication rule \"$duplicationRule\"");
+                if( !empty( $duplicationRule ) ) {
+                    throw new UploadException( "Unknow this duplication rule \"$duplicationRule\"" );
                 }
             } else {
                 throw new UploadException( 'Not specified rule for duplication name' );
@@ -192,10 +202,55 @@ class UploadManager implements UploadManagerInterface
         ];
     }
     
+    
     private function validConfiguration(): void
     {
-        if(!isset($this->config[UploadManagerInterface::PATH])){
-            throw new UploadException('The index "path" is required');
+        if( !isset( $this->config[UploadManagerInterface::PATH] ) ) {
+            throw new UploadException( 'The index "path" is required' );
         }
+    }
+    
+    
+    /**
+     * Must wait status transactionfor upload
+     *
+     * @return bool
+     */
+    private function mustWaitTransaction(): bool
+    {
+        return isset( $this->config[UploadManagerInterface::WAIT_TRANSACTION] ) && $this->config[self::WAIT_TRANSACTION];
+    }
+    
+    
+    /**
+     * Move file
+     *
+     * @param string $tmp
+     * @param string $path
+     */
+    private function move( string $tmp, string $path ): void
+    {
+        move_uploaded_file( $tmp, $path );
+    }
+    
+    
+    /**
+     * If transaction validate, upload file
+     *
+     * @param bool $status
+     */
+    public function statusTransactionNotified( bool $status ): void
+    {
+        if( $status ) {
+            foreach( $this->toMove as $tmp => $path ) {
+                $this->move( $tmp, $path );
+            }
+        }
+    }
+    
+    
+    public function subscribeToTransactionStatus(): void
+    {
+        $this->transactionSubject->addSubscriber( $this );
     }
 }

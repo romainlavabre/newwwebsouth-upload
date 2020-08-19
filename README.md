@@ -16,12 +16,13 @@ return [ <br>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'type_2',<br>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;],<br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;UploadManagerInterface::DUPLICATION_RULE => 'closure|string : iteration| string : overwrite| string : crash'<br> 
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;UploadManagerInterface::DUPLICATION_RULE => 'closure|string : iteration| string : overwrite| string : crash',<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;UploadManagerInterface::WAIT_TRANSACTION => false|true
     &nbsp;&nbsp;&nbsp;&nbsp;]<br>
 ]
 </code>
 
-For Duplication rule
+For DUPLICATION_RULE
 
 *Closure:* function(string $originalName){ ... }
 
@@ -32,6 +33,10 @@ For Duplication rule
 *"overwrite":* The file will be overwriting
 
 *"crash":* You will receive a `Newwebsouth\Upload\Exception\UploadDuplicationException::class`
+
+For WAIT_TRANSACTION
+
+If true, the file will be upload when the transaction have success
 
 Mappe the interface in container configuration
 

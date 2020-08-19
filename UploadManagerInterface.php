@@ -15,6 +15,7 @@ interface UploadManagerInterface
     public const MAX_FILE_SIZE    = 'max_file_size';
     public const DUPLICATION_RULE = 'duplication_rule';
     public const ACCEPT_TYPE      = 'accept_type';
+    public const WAIT_TRANSACTION = 'wait_transaction';
     public const META_LOCAL_PATH                   = 'local_path';
     public const META_PUBLIC_PATH                  = 'public_path';
     public const META_SIZE                         = 'size';
