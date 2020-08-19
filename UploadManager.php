@@ -30,10 +30,11 @@ class UploadManager implements UploadManagerInterface
     public function upload( array $part, string $configurationName ): array
     {
         $this->config = $this->configuration->getConfiguration( $configurationName );
-        $this->validSize( filesize( $part['tmp_name'] ) );
-        $this->validType( $part['type'] );
+        $this->validConfiguration();
+        $this->validSize( $part['size'] );
+        $this->validType( $part['name'] );
         
-        $name = $this->getName( $part['tmp_name'] );
+        $name = $this->getName( $part['name'] );
         
         if( move_uploaded_file(
             $part['tmp_name'],
@@ -60,6 +61,7 @@ class UploadManager implements UploadManagerInterface
         
         if( file_exists( $this->config[UploadManagerInterface::PATH] ) . $tmpName ) {
             if( isset( $duplicationRule ) ) {
+                
                 if( is_callable( $duplicationRule ) ) {
                     return $duplicationRule( $tmpName );
                 }
@@ -68,7 +70,7 @@ class UploadManager implements UploadManagerInterface
                     return $tmpName;
                 }
                 
-                if( $duplicationRule === 'iterate' ) {
+                if( $duplicationRule === 'iteration' ) {
                     $path      = $this->config[UploadManagerInterface::PATH];
                     $iteration = count( scandir( $path ) );
                     $tmp       = $this->decomposeFilename( $tmpName );
@@ -84,6 +86,10 @@ class UploadManager implements UploadManagerInterface
                 
                 if($duplicationRule === 'crash'){
                     throw new UploadDuplicationException('This file already exists');
+                }
+                
+                if(!empty($duplicationRule)){
+                    throw new UploadException("Unknow this duplication rule \"$duplicationRule\"");
                 }
             } else {
                 throw new UploadException( 'Not specified rule for duplication name' );
@@ -104,7 +110,7 @@ class UploadManager implements UploadManagerInterface
     {
         $isTypeFound = FALSE;
         
-        if( isset( $this->config[UploadManagerInterface::ACCEPT_TYPE] ) ) {
+        if( !isset( $this->config[UploadManagerInterface::ACCEPT_TYPE] ) ) {
             return;
         }
         
@@ -115,7 +121,7 @@ class UploadManager implements UploadManagerInterface
         }
         
         if( !$isTypeFound ) {
-            throw new UploadException( 'The type is invalid' );
+            throw new UploadException( 'This type is invalid' );
         }
     }
     
@@ -184,5 +190,12 @@ class UploadManager implements UploadManagerInterface
             UploadManagerInterface::META_SHORT_NAME_WITH_EXTENSION    => $filename,
             UploadManagerInterface::META_SHORT_NAME_WITHOUT_EXTENSION => $nameWithoutExt
         ];
+    }
+    
+    private function validConfiguration(): void
+    {
+        if(!isset($this->config[UploadManagerInterface::PATH])){
+            throw new UploadException('The index "path" is required');
+        }
     }
 }
