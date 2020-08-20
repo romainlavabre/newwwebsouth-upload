@@ -1,0 +1,10 @@
+[1.0.3]
+# Fixed
+- Image iterate but not exists
+- Crash filesize when waiting transaction
+
+[1.0.2]
+# Added
+- Waiting transaction
+- function Convert to multiple array
+

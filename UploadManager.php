@@ -55,7 +55,7 @@ class UploadManager implements UploadManagerInterface, TransactionObserverInterf
             $this->move( $part['tmp_name'], $this->config[UploadManagerInterface::PATH] . $name );
         }
         
-        return $this->buildMetadata( $name );
+        return $this->buildMetadata( $name, $part['size'] );
     }
     
     
@@ -71,7 +71,7 @@ class UploadManager implements UploadManagerInterface, TransactionObserverInterf
     {
         $duplicationRule = $this->config[UploadManagerInterface::DUPLICATION_RULE];
         
-        if( file_exists( $this->config[UploadManagerInterface::PATH] ) . $tmpName ) {
+        if( file_exists( $this->config[UploadManagerInterface::PATH] . $tmpName) ) {
             if( isset( $duplicationRule ) ) {
                 
                 if( is_callable( $duplicationRule ) ) {
@@ -183,7 +183,7 @@ class UploadManager implements UploadManagerInterface, TransactionObserverInterf
      * @param string $filename
      * @return array
      */
-    private function buildMetadata( string $filename ): array
+    private function buildMetadata( string $filename, int $size ): array
     {
         $path = $this->config[UploadManagerInterface::PATH] . $filename;
         
@@ -198,7 +198,7 @@ class UploadManager implements UploadManagerInterface, TransactionObserverInterf
                 strpos( $path, ROOT . 'public/' ) !== FALSE
                     ? str_replace( ROOT . 'public', '', $path )
                     : NULL,
-            UploadManagerInterface::META_SIZE                         => filesize( $path ),
+            UploadManagerInterface::META_SIZE                         => $size,
             UploadManagerInterface::META_SHORT_NAME_WITH_EXTENSION    => $filename,
             UploadManagerInterface::META_SHORT_NAME_WITHOUT_EXTENSION => $nameWithoutExt
         ];
