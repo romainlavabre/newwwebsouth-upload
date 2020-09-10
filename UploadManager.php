@@ -8,8 +8,8 @@ use Newwebsouth\Upload\Exception\UploadDuplicationException;
 use Newwebsouth\Upload\Exception\UploadException;
 use Newwebsouth\Upload\Exception\UploadSizeException;
 use Newwebsouth\Upload\Exception\UploadTypeException;
-use Nomess\Components\EntityManager\TransactionObserverInterface;
-use Nomess\Components\EntityManager\TransactionSubjectInterface;
+use Nomess\Component\Orm\TransactionObserverInterface;
+use Nomess\Component\Orm\TransactionSubjectInterface;
 
 class UploadManager implements UploadManagerInterface, TransactionObserverInterface
 {
@@ -18,17 +18,8 @@ class UploadManager implements UploadManagerInterface, TransactionObserverInterf
      * @Inject()
      */
     private Configuration $configuration;
-    private TransactionSubjectInterface $transactionSubject;
     private array                       $config;
     private array                       $toMove = array();
-    
-    
-    public function __construct( TransactionSubjectInterface $transactionSubject )
-    {
-        $this->transactionSubject = $transactionSubject;
-        $this->subscribeToTransactionStatus();
-    }
-    
     
     /**
      * @param array $part
@@ -251,9 +242,13 @@ class UploadManager implements UploadManagerInterface, TransactionObserverInterf
     }
     
     
-    public function subscribeToTransactionStatus(): void
+    /**
+     * @Inject
+     * @param TransactionObserverInterface $transactionObserver
+     */
+    public function subscribeToTransactionStatus(TransactionSubjectInterface $transactionSubject): void
     {
-        $this->transactionSubject->addSubscriber( $this );
+        $transactionSubject->addSubscriber( $this );
     }
     
     public function convertToMultipleArray( array $parts ): array

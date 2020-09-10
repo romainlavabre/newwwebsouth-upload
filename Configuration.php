@@ -5,23 +5,22 @@ namespace Newwebsouth\Upload;
 
 
 use Newwebsouth\Upload\Exception\MissingConfigurationException;
+use Nomess\Component\Cache\CacheHandlerInterface;
+use Nomess\Component\Config\ConfigStoreInterface;
 
 class Configuration
 {
-    private const PATH_CONFIGURATION = ROOT . 'config/components/Upload.php';
+    private const CONF_NAME = 'upload';
     private array $config;
     
     /**
      *
      * * @throws MissingConfigurationException
      */
-    public function __construct()
+    public function __construct(ConfigStoreInterface $configStore)
     {
-        if(!file_exists(self::PATH_CONFIGURATION)){
-            throw new MissingConfigurationException('The components upload must have a file config in config/components/Upload.php');
-        }
         
-        $this->config = require self::PATH_CONFIGURATION;
+        $this->config = $configStore->get(self::CONF_NAME);
         
     }
     
