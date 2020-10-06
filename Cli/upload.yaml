@@ -1,0 +1,17 @@
+# Title of first configuration
+image:
+    # Path of storage
+    path: '%ROOT%public/storage/images/'
+    # iteration => add a integer after filename
+    # crash => throw new Exception
+    # overwrite => overwrite
+    duplication_rule: 'iteration'
+    # All type accepted
+    accept_type:
+        - png
+        - jpg
+        - jpeg
+    # If 0, no limit, else, specify the size with octets
+    max_file_size: 0
+    # Wait the success of transaction (database) before upload the file
+    wait_transaction: true
